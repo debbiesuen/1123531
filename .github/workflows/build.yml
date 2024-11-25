@@ -6,27 +6,30 @@
 
 using namespace std;
 
-// Structure to represent a graph node
+// Structure to represent a graph edge
 struct Edge {
-    int destination;
-    int weight; // Travel time or cost
+    int destination; // Destination node
+    int weight;      // Travel time or cost
 };
 
 // Graph class
 class Graph {
 private:
-    unordered_map<int, vector<Edge>> adjList;
+    unordered_map<int, vector<Edge>> adjList; // Adjacency list representation of the graph
 
 public:
+    // Add an edge to the graph
     void addEdge(int source, int destination, int weight) {
         adjList[source].push_back({destination, weight});
         adjList[destination].push_back({source, weight}); // Bidirectional graph
     }
 
+    // Get neighbors of a node
     vector<Edge>& getNeighbors(int node) {
         return adjList[node];
     }
 
+    // Get all nodes in the graph
     vector<int> getNodes() {
         vector<int> nodes;
         for (auto& entry : adjList) {
@@ -40,11 +43,14 @@ public:
 vector<int> dijkstra(Graph& graph, int start, int end, int& totalTime) {
     unordered_map<int, int> distances; // Distance from start to each node
     unordered_map<int, int> previous; // To reconstruct the path
+
+    // Initialize distances to infinity
     for (auto node : graph.getNodes()) {
         distances[node] = INT_MAX;
     }
     distances[start] = 0;
 
+    // Priority queue for nodes based on minimum distance
     auto compare = [](pair<int, int>& a, pair<int, int>& b) {
         return a.second > b.second; // Min-heap based on distance
     };
@@ -52,17 +58,19 @@ vector<int> dijkstra(Graph& graph, int start, int end, int& totalTime) {
     pq.push({start, 0});
 
     while (!pq.empty()) {
-        int current = pq.top().first;
-        int currentDist = pq.top().second;
+        int current = pq.top().first; // Current node
+        int currentDist = pq.top().second; // Distance to current node
         pq.pop();
 
-        if (current == end) break; // Stop when we reach the destination
+        if (current == end) break; // Stop if the destination is reached
 
+        // Explore neighbors
         for (auto& edge : graph.getNeighbors(current)) {
             int neighbor = edge.destination;
             int weight = edge.weight;
             int newDist = currentDist + weight;
 
+            // Update distance if a shorter path is found
             if (newDist < distances[neighbor]) {
                 distances[neighbor] = newDist;
                 previous[neighbor] = current;
